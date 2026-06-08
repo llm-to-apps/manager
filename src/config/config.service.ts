@@ -6,7 +6,10 @@ export class ConfigService {
   readonly port = Number(process.env.PORT || 8080);
   readonly dockerSocket = process.env.DOCKER_SOCKET || '/var/run/docker.sock';
   readonly rootDomain = process.env.ROOT_DOMAIN || 'llmagents.com';
-  readonly mysqlAdminUrl = process.env.MYSQL_ADMIN_URL;
+  readonly mysqlHost = process.env.MYSQL_HOST || 'mysql';
+  readonly mysqlPort = Number(process.env.MYSQL_PORT || 3306);
+  readonly mysqlRootUser = process.env.MYSQL_ROOT_USER || 'root';
+  readonly mysqlRootPassword = process.env.MYSQL_ROOT_PASSWORD;
   readonly userInstanceImage =
     process.env.USER_INSTANCE_IMAGE || 'llagents/user-instance:latest';
   readonly publicNetworkId = process.env.PUBLIC_NETWORK_ID;
@@ -23,11 +26,16 @@ export class ConfigService {
     };
   }
 
-  requireMysqlAdminUrl() {
-    if (!this.mysqlAdminUrl) {
-      throw new Error('MYSQL_ADMIN_URL must be configured');
+  requireMysqlRootConfig() {
+    if (!this.mysqlRootUser || !this.mysqlRootPassword) {
+      throw new Error('MYSQL_ROOT_USER and MYSQL_ROOT_PASSWORD must be configured');
     }
 
-    return this.mysqlAdminUrl;
+    return {
+      host: this.mysqlHost,
+      port: this.mysqlPort,
+      user: this.mysqlRootUser,
+      password: this.mysqlRootPassword
+    };
   }
 }

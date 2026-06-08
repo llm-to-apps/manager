@@ -82,7 +82,7 @@ Example project service request:
 }
 ```
 
-The manager provisions the project MySQL database/user through `MYSQL_ADMIN_URL`, builds the runtime `DATABASE_URL`, and creates a Swarm service for the user instance.
+The manager provisions the project MySQL database/user through root MySQL credentials, builds the runtime `DATABASE_URL`, and creates a Swarm service for the user instance.
 
 `POST /swarm/projects` requires these manager environment variables:
 
@@ -90,5 +90,7 @@ The manager provisions the project MySQL database/user through `MYSQL_ADMIN_URL`
 PUBLIC_NETWORK_ID
 INTERNAL_NETWORK_ID
 USER_INSTANCE_IMAGE
-MYSQL_ADMIN_URL
+MYSQL_HOST
+MYSQL_ROOT_USER
+MYSQL_ROOT_PASSWORD
 ```

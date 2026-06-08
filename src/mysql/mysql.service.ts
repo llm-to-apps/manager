@@ -8,8 +8,8 @@ export class MysqlService {
   constructor(private readonly config: ConfigService) {}
 
   async provisionProjectDatabase(mysql: MysqlServiceConfigDto) {
-    const adminUrl = this.getMysqlAdminUrl();
-    const connection = await createConnection(adminUrl);
+    const adminConfig = this.getMysqlRootConfig();
+    const connection = await createConnection(adminConfig);
 
     try {
       await connection.query(`CREATE DATABASE IF NOT EXISTS ??`, [mysql.db]);
@@ -36,9 +36,8 @@ export class MysqlService {
   }
 
   buildProjectDatabaseUrl(mysql: MysqlServiceConfigDto, env: Record<string, string>) {
-    const adminUrl = new URL(this.getMysqlAdminUrl());
-    const host = env.MYSQL_HOST || adminUrl.hostname || 'mysql';
-    const port = env.MYSQL_PORT || adminUrl.port || '3306';
+    const host = env.MYSQL_HOST || this.config.mysqlHost;
+    const port = env.MYSQL_PORT || String(this.config.mysqlPort);
     const user = encodeURIComponent(mysql.user);
     const password = encodeURIComponent(mysql.password);
     const db = encodeURIComponent(mysql.db);
@@ -46,12 +45,14 @@ export class MysqlService {
     return `mysql://${user}:${password}@${host}:${port}/${db}`;
   }
 
-  private getMysqlAdminUrl() {
+  private getMysqlRootConfig() {
     try {
-      return this.config.requireMysqlAdminUrl();
+      return this.config.requireMysqlRootConfig();
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : 'MYSQL_ADMIN_URL is missing';
+        error instanceof Error
+          ? error.message
+          : 'MySQL root credentials are missing';
 
       throw new ServiceUnavailableException({
         ok: false,
