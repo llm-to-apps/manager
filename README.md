@@ -18,6 +18,16 @@ Do not expose this service publicly. It can create, inspect, restart, and remove
 docker build -t llagents/manager:local ./manager
 ```
 
+## Published image
+
+The `main` branch publishes the Docker image to GitHub Container Registry:
+
+```text
+ghcr.io/llm-to-apps/manager:latest
+```
+
+Tagged releases like `v0.1.0` also publish matching image tags.
+
 ## Development
 
 ```bash
