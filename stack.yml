@@ -1,0 +1,29 @@
+version: "3.9"
+
+services:
+  manager:
+    image: llagents/manager:local
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      PORT: "8080"
+      ROOT_DOMAIN: llmagents.com
+      USER_INSTANCE_IMAGE: llagents/user-instance:latest
+      PUBLIC_NETWORK_ID: public
+      INTERNAL_NETWORK_ID: internal
+    networks:
+      - public
+      - internal
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: any
+
+networks:
+  public:
+    external: true
+  internal:
+    driver: overlay
+    attachable: true
