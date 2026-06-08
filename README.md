@@ -72,7 +72,11 @@ Example project service request:
   },
   "env": {
     "MYSQL_HOST": "mysql",
-    "MYSQL_PORT": "3306"
+    "MYSQL_PORT": "3306",
+    "MYSQL_DATABASE": "xxxYYY",
+    "MYSQL_USER": "xxxYYY",
+    "MYSQL_PASSWORD": "xxxYYY",
+    "DATABASE_URL": "mysql://xxxYYY:xxxYYY@mysql:3306/xxxYYY"
   },
   "domain": "demo.llmagents.com",
   "ports": {
@@ -82,7 +86,7 @@ Example project service request:
 }
 ```
 
-The manager provisions the project MySQL database/user through root MySQL credentials, builds the runtime `DATABASE_URL`, and creates a Swarm service for the user instance.
+The manager provisions the project MySQL database/user through root MySQL credentials and creates a Swarm service for the user instance. Runtime environment variables are passed from `env`; if the app needs `DATABASE_URL`, include it explicitly in `env`.
 
 `POST /swarm/projects` requires these manager environment variables:
 

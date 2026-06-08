@@ -76,18 +76,11 @@ export class DockerService {
 
     await this.mysqlService.provisionProjectDatabase(input.services.mysql);
 
-    const databaseUrl =
-      projectEnv.DATABASE_URL ??
-      this.mysqlService.buildProjectDatabaseUrl(input.services.mysql, projectEnv);
     const env = this.toDockerEnv({
       ...projectEnv,
       PROJECT_ID: input.id,
       REPO_URL: input.git,
       GIT_REPO_URL: input.git,
-      DATABASE_URL: databaseUrl,
-      MYSQL_DATABASE: input.services.mysql.db,
-      MYSQL_USER: input.services.mysql.user,
-      MYSQL_PASSWORD: input.services.mysql.password,
       APP_DOMAIN: input.domain,
       APP_PORT: String(appPort),
       AGENT_PORT: String(agentPort),

@@ -35,16 +35,6 @@ export class MysqlService {
     }
   }
 
-  buildProjectDatabaseUrl(mysql: MysqlServiceConfigDto, env: Record<string, string>) {
-    const host = env.MYSQL_HOST || this.config.mysqlHost;
-    const port = env.MYSQL_PORT || String(this.config.mysqlPort);
-    const user = encodeURIComponent(mysql.user);
-    const password = encodeURIComponent(mysql.password);
-    const db = encodeURIComponent(mysql.db);
-
-    return `mysql://${user}:${password}@${host}:${port}/${db}`;
-  }
-
   private getMysqlRootConfig() {
     try {
       return this.config.requireMysqlRootConfig();
