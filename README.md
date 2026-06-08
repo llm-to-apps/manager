@@ -91,7 +91,8 @@ The manager provisions the project MySQL database/user through root MySQL creden
 `POST /swarm/projects` requires these manager environment variables:
 
 ```text
-PROJECT_NETWORK_ID
+DB_NETWORK_ID
+INGRESS_NETWORK_ID
 USER_INSTANCE_IMAGE
 MYSQL_HOST
 MYSQL_ROOT_USER

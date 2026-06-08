@@ -12,14 +12,18 @@ export class ConfigService {
   readonly mysqlRootPassword = process.env.MYSQL_ROOT_PASSWORD;
   readonly userInstanceImage =
     process.env.USER_INSTANCE_IMAGE || 'llagents/user-instance:latest';
-  readonly projectNetworkId = process.env.PROJECT_NETWORK_ID;
+  readonly dbNetworkId = process.env.DB_NETWORK_ID;
+  readonly ingressNetworkId = process.env.INGRESS_NETWORK_ID;
 
-  requireProjectNetwork() {
-    if (!this.projectNetworkId) {
-      throw new Error('PROJECT_NETWORK_ID must be configured');
+  requireProjectNetworks() {
+    if (!this.dbNetworkId || !this.ingressNetworkId) {
+      throw new Error('DB_NETWORK_ID and INGRESS_NETWORK_ID must be configured');
     }
 
-    return this.projectNetworkId;
+    return {
+      dbNetworkId: this.dbNetworkId,
+      ingressNetworkId: this.ingressNetworkId
+    };
   }
 
   requireMysqlRootConfig() {

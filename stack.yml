@@ -9,9 +9,11 @@ services:
       PORT: "8080"
       ROOT_DOMAIN: llmagents.com
       USER_INSTANCE_IMAGE: llagents/user-instance:latest
-      PROJECT_NETWORK_ID: runtime
+      DB_NETWORK_ID: db
+      INGRESS_NETWORK_ID: ingress
     networks:
-      - runtime
+      - internal
+      - db
     deploy:
       placement:
         constraints:
@@ -20,6 +22,12 @@ services:
         condition: any
 
 networks:
-  runtime:
+  internal:
+    driver: overlay
+    attachable: true
+  db:
+    driver: overlay
+    attachable: true
+  ingress:
     driver: overlay
     attachable: true
