@@ -42,12 +42,6 @@ npm run typecheck
 npm run build
 ```
 
-## Swarm stack example
-
-```bash
-docker stack deploy -c manager/stack.yml llagents
-```
-
 ## API
 
 ```text
