@@ -63,8 +63,7 @@ export class DockerService {
   }
 
   async createProjectService(input: CreateProjectServiceDto) {
-    const { publicNetworkId, internalNetworkId } =
-      this.config.requireSwarmNetworks();
+    const projectNetworkId = this.config.requireProjectNetwork();
     const projectEnv = input.env ?? {};
     const appPort = input.ports?.app ?? 3001;
     const agentPort = input.ports?.agent ?? 7001;
@@ -123,10 +122,7 @@ export class DockerService {
             Replicas: 1
           }
         },
-        Networks: [
-          { Target: publicNetworkId },
-          { Target: internalNetworkId }
-        ]
+        Networks: [{ Target: projectNetworkId }]
       });
 
       return {

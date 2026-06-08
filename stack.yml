@@ -9,11 +9,9 @@ services:
       PORT: "8080"
       ROOT_DOMAIN: llmagents.com
       USER_INSTANCE_IMAGE: llagents/user-instance:latest
-      PUBLIC_NETWORK_ID: public
-      INTERNAL_NETWORK_ID: internal
+      PROJECT_NETWORK_ID: runtime
     networks:
-      - public
-      - internal
+      - runtime
     deploy:
       placement:
         constraints:
@@ -22,8 +20,6 @@ services:
         condition: any
 
 networks:
-  public:
-    external: true
-  internal:
+  runtime:
     driver: overlay
     attachable: true

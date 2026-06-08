@@ -12,18 +12,14 @@ export class ConfigService {
   readonly mysqlRootPassword = process.env.MYSQL_ROOT_PASSWORD;
   readonly userInstanceImage =
     process.env.USER_INSTANCE_IMAGE || 'llagents/user-instance:latest';
-  readonly publicNetworkId = process.env.PUBLIC_NETWORK_ID;
-  readonly internalNetworkId = process.env.INTERNAL_NETWORK_ID;
+  readonly projectNetworkId = process.env.PROJECT_NETWORK_ID;
 
-  requireSwarmNetworks() {
-    if (!this.publicNetworkId || !this.internalNetworkId) {
-      throw new Error('PUBLIC_NETWORK_ID and INTERNAL_NETWORK_ID must be configured');
+  requireProjectNetwork() {
+    if (!this.projectNetworkId) {
+      throw new Error('PROJECT_NETWORK_ID must be configured');
     }
 
-    return {
-      publicNetworkId: this.publicNetworkId,
-      internalNetworkId: this.internalNetworkId
-    };
+    return this.projectNetworkId;
   }
 
   requireMysqlRootConfig() {
