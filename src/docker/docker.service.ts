@@ -106,8 +106,7 @@ export class DockerService {
           'llagents.project_id': input.id,
           'traefik.enable': 'true',
           [`traefik.http.routers.${serviceName}.rule`]: `Host(\`${input.domain}\`)`,
-          [`traefik.http.routers.${serviceName}.entrypoints`]: 'websecure',
-          [`traefik.http.routers.${serviceName}.tls.certresolver`]: 'letsencrypt',
+          [`traefik.http.routers.${serviceName}.entrypoints`]: 'web',
           [`traefik.http.services.${serviceName}.loadbalancer.server.port`]:
             String(appPort)
         },
