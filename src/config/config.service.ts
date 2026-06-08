@@ -6,6 +6,7 @@ export class ConfigService {
   readonly port = Number(process.env.PORT || 8080);
   readonly dockerSocket = process.env.DOCKER_SOCKET || '/var/run/docker.sock';
   readonly rootDomain = process.env.ROOT_DOMAIN || 'llmagents.com';
+  readonly mysqlAdminUrl = process.env.MYSQL_ADMIN_URL;
   readonly userInstanceImage =
     process.env.USER_INSTANCE_IMAGE || 'llagents/user-instance:latest';
   readonly publicNetworkId = process.env.PUBLIC_NETWORK_ID;
@@ -20,5 +21,13 @@ export class ConfigService {
       publicNetworkId: this.publicNetworkId,
       internalNetworkId: this.internalNetworkId
     };
+  }
+
+  requireMysqlAdminUrl() {
+    if (!this.mysqlAdminUrl) {
+      throw new Error('MYSQL_ADMIN_URL must be configured');
+    }
+
+    return this.mysqlAdminUrl;
   }
 }

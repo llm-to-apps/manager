@@ -3,10 +3,11 @@ import { ConfigService } from './config/config.service';
 import { DockerController } from './docker/docker.controller';
 import { DockerService } from './docker/docker.service';
 import { HealthController } from './health/health.controller';
+import { MysqlService } from './mysql/mysql.service';
 import { SwarmController } from './swarm/swarm.controller';
 
 @Module({
   controllers: [HealthController, DockerController, SwarmController],
-  providers: [ConfigService, DockerService]
+  providers: [ConfigService, DockerService, MysqlService]
 })
 export class AppModule {}

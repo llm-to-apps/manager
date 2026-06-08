@@ -1,52 +1,77 @@
 import {
   IsInt,
+  IsDefined,
   IsNotEmpty,
+  IsObject,
   IsOptional,
   IsString,
   Max,
-  Min
+  Min,
+  ValidateNested
 } from 'class-validator';
+import { Type } from 'class-transformer';
+
+export class MysqlServiceConfigDto {
+  @IsString()
+  @IsNotEmpty()
+  db!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  user!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  password!: string;
+}
+
+export class ProjectServicesDto {
+  @IsDefined()
+  @ValidateNested()
+  @Type(() => MysqlServiceConfigDto)
+  mysql!: MysqlServiceConfigDto;
+}
+
+export class ProjectPortsDto {
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(65535)
+  app?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(65535)
+  agent?: number;
+}
 
 export class CreateProjectServiceDto {
   @IsString()
   @IsNotEmpty()
-  projectId!: string;
+  id!: string;
 
   @IsString()
   @IsNotEmpty()
-  repoUrl!: string;
-
-  @IsString()
-  @IsNotEmpty()
-  databaseUrl!: string;
+  git!: string;
 
   @IsString()
   @IsNotEmpty()
   domain!: string;
 
-  @IsOptional()
-  @IsInt()
-  @Min(1)
-  @Max(65535)
-  appPort?: number;
+  @IsDefined()
+  @ValidateNested()
+  @Type(() => ProjectServicesDto)
+  services!: ProjectServicesDto;
 
   @IsOptional()
-  @IsInt()
-  @Min(1)
-  @Max(65535)
-  agentPort?: number;
+  @IsObject()
+  env?: Record<string, string>;
 
   @IsOptional()
-  @IsString()
-  startCommand?: string;
-
-  @IsOptional()
-  @IsString()
-  migrateCommand?: string;
-
-  @IsOptional()
-  @IsString()
-  seedCommand?: string;
+  @ValidateNested()
+  @Type(() => ProjectPortsDto)
+  ports?: ProjectPortsDto;
 
   @IsOptional()
   @IsString()

@@ -61,14 +61,28 @@ Example project service request:
 
 ```json
 {
-  "projectId": "123",
-  "repoUrl": "git@github.com:llagents/project-123.git",
-  "databaseUrl": "mysql://project_123_user:password@mysql-host:3306/project_123",
-  "domain": "xyz.llmagents.com",
-  "appPort": 3001,
-  "agentPort": 7001
+  "id": "xxxYYY",
+  "git": "git@github.com:llm-to-apps/project-123.git",
+  "services": {
+    "mysql": {
+      "db": "xxxYYY",
+      "user": "xxxYYY",
+      "password": "xxxYYY"
+    }
+  },
+  "env": {
+    "MYSQL_HOST": "mysql",
+    "MYSQL_PORT": "3306"
+  },
+  "domain": "demo.llmagents.com",
+  "ports": {
+    "app": 3001,
+    "agent": 7001
+  }
 }
 ```
+
+The manager provisions the project MySQL database/user through `MYSQL_ADMIN_URL`, builds the runtime `DATABASE_URL`, and creates a Swarm service for the user instance.
 
 `POST /swarm/projects` requires these manager environment variables:
 
@@ -76,4 +90,5 @@ Example project service request:
 PUBLIC_NETWORK_ID
 INTERNAL_NETWORK_ID
 USER_INSTANCE_IMAGE
+MYSQL_ADMIN_URL
 ```

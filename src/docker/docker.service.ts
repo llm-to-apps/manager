@@ -1,6 +1,7 @@
 import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import Dockerode from 'dockerode';
 import { ConfigService } from '../config/config.service';
+import { MysqlService } from '../mysql/mysql.service';
 import { CreateProjectServiceDto } from '../swarm/dto/create-project-service.dto';
 
 type ServiceSummary = {
@@ -17,7 +18,10 @@ type ServiceSummary = {
 export class DockerService {
   private readonly docker: Dockerode;
 
-  constructor(private readonly config: ConfigService) {
+  constructor(
+    private readonly config: ConfigService,
+    private readonly mysqlService: MysqlService
+  ) {
     this.docker = new Dockerode({
       socketPath: this.config.dockerSocket
     });
@@ -61,32 +65,45 @@ export class DockerService {
   async createProjectService(input: CreateProjectServiceDto) {
     const { publicNetworkId, internalNetworkId } =
       this.config.requireSwarmNetworks();
-    const appPort = input.appPort ?? 3001;
-    const agentPort = input.agentPort ?? 7001;
-    const startCommand = input.startCommand ?? 'npm run dev';
-    const migrateCommand = input.migrateCommand ?? 'npm run db:deploy';
+    const projectEnv = input.env ?? {};
+    const appPort = input.ports?.app ?? 3001;
+    const agentPort = input.ports?.agent ?? 7001;
+    const startCommand = projectEnv.START_COMMAND ?? 'npm run dev';
+    const migrateCommand = projectEnv.MIGRATE_COMMAND ?? 'npm run db:deploy';
+    const seedCommand = projectEnv.SEED_COMMAND;
     const image = input.image ?? this.config.userInstanceImage;
-    const serviceName = `project-${input.projectId}`;
-    const env = [
-      `PROJECT_ID=${input.projectId}`,
-      `REPO_URL=${input.repoUrl}`,
-      `DATABASE_URL=${input.databaseUrl}`,
-      `APP_DOMAIN=${input.domain}`,
-      `APP_PORT=${appPort}`,
-      `AGENT_PORT=${agentPort}`,
-      `START_COMMAND=${startCommand}`,
-      `MIGRATE_COMMAND=${migrateCommand}`
-    ];
+    const serviceName = `project-${input.id}`;
 
-    if (input.seedCommand) {
-      env.push(`SEED_COMMAND=${input.seedCommand}`);
+    await this.mysqlService.provisionProjectDatabase(input.services.mysql);
+
+    const databaseUrl =
+      projectEnv.DATABASE_URL ??
+      this.mysqlService.buildProjectDatabaseUrl(input.services.mysql, projectEnv);
+    const env = this.toDockerEnv({
+      ...projectEnv,
+      PROJECT_ID: input.id,
+      REPO_URL: input.git,
+      GIT_REPO_URL: input.git,
+      DATABASE_URL: databaseUrl,
+      MYSQL_DATABASE: input.services.mysql.db,
+      MYSQL_USER: input.services.mysql.user,
+      MYSQL_PASSWORD: input.services.mysql.password,
+      APP_DOMAIN: input.domain,
+      APP_PORT: String(appPort),
+      AGENT_PORT: String(agentPort),
+      START_COMMAND: startCommand,
+      MIGRATE_COMMAND: migrateCommand
+    });
+
+    if (seedCommand) {
+      env.push(`SEED_COMMAND=${seedCommand}`);
     }
 
     try {
       const service = await this.docker.createService({
         Name: serviceName,
         Labels: {
-          'llagents.project_id': input.projectId,
+          'llagents.project_id': input.id,
           'traefik.enable': 'true',
           [`traefik.http.routers.${serviceName}.rule`]: `Host(\`${input.domain}\`)`,
           [`traefik.http.routers.${serviceName}.entrypoints`]: 'websecure',
@@ -141,5 +158,9 @@ export class DockerService {
 
   private getServiceImage(service: ServiceSummary) {
     return service.Spec?.TaskTemplate?.ContainerSpec?.Image;
+  }
+
+  private toDockerEnv(env: Record<string, string>) {
+    return Object.entries(env).map(([key, value]) => `${key}=${value}`);
   }
 }
