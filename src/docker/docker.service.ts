@@ -68,7 +68,6 @@ export class DockerService {
     const projectEnv = input.env ?? {};
     const appPort = input.ports?.app ?? 3001;
     const agentPort = input.ports?.agent ?? 7001;
-    const startCommand = projectEnv.START_COMMAND ?? 'npm run dev';
     const migrateCommand = projectEnv.MIGRATE_COMMAND ?? 'npm run db:deploy';
     const seedCommand = projectEnv.SEED_COMMAND;
     const image = input.image ?? this.config.userInstanceImage;
@@ -84,7 +83,6 @@ export class DockerService {
       APP_DOMAIN: input.domain,
       APP_PORT: String(appPort),
       AGENT_PORT: String(agentPort),
-      START_COMMAND: startCommand,
       MIGRATE_COMMAND: migrateCommand
     });
 
@@ -106,8 +104,7 @@ export class DockerService {
         TaskTemplate: {
           ContainerSpec: {
             Image: image,
-            Env: env,
-            Command: ['node', '/agent/bootstrap.js']
+            Env: env
           },
           RestartPolicy: {
             Condition: 'any'
