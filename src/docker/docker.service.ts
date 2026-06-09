@@ -106,6 +106,7 @@ export class DockerService {
             Image: image,
             Env: env
           },
+          Networks: [{ Target: dbNetworkId }, { Target: ingressNetworkId }],
           RestartPolicy: {
             Condition: 'any'
           },
@@ -119,8 +120,7 @@ export class DockerService {
           Replicated: {
             Replicas: 1
           }
-        },
-        Networks: [{ Target: dbNetworkId }, { Target: ingressNetworkId }]
+        }
       });
 
       return {
