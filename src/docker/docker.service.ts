@@ -5,7 +5,16 @@ import { MysqlService } from '../mysql/mysql.service';
 import { CreateProjectServiceDto } from '../swarm/dto/create-project-service.dto';
 
 type ServiceSummary = {
+  ID?: string;
+  CreatedAt?: string;
+  UpdatedAt?: string;
   Spec?: {
+    Name?: string;
+    Mode?: {
+      Replicated?: {
+        Replicas?: number;
+      };
+    };
     TaskTemplate?: Dockerode.TaskSpec & {
       ContainerSpec?: {
         Image?: string;
@@ -57,6 +66,65 @@ export class DockerService {
         createdAt: service.CreatedAt,
         updatedAt: service.UpdatedAt
       }));
+    } catch (error) {
+      throw this.toServiceUnavailable(error);
+    }
+  }
+
+  async getProjectServiceStatus(projectId: string) {
+    const serviceName = `project-${projectId}`;
+
+    try {
+      const services = await this.docker.listServices({
+        filters: JSON.stringify({
+          name: [serviceName]
+        })
+      });
+      const service = services.find((candidate) => candidate.Spec?.Name === serviceName);
+
+      if (!service) {
+        return {
+          ok: true,
+          projectId,
+          serviceName,
+          exists: false,
+          ready: false,
+          desiredReplicas: 0,
+          runningReplicas: 0,
+          tasks: []
+        };
+      }
+
+      const tasks = await this.docker.listTasks({
+        filters: JSON.stringify({
+          service: [service.ID]
+        })
+      });
+      const desiredReplicas = service.Spec?.Mode?.Replicated?.Replicas ?? 1;
+      const runningReplicas = tasks.filter(
+        (task) =>
+          task.DesiredState === 'running' &&
+          task.Status?.State === 'running'
+      ).length;
+
+      return {
+        ok: true,
+        projectId,
+        serviceId: service.ID,
+        serviceName,
+        exists: true,
+        ready: runningReplicas >= desiredReplicas,
+        desiredReplicas,
+        runningReplicas,
+        tasks: tasks.map((task) => ({
+          id: task.ID,
+          desiredState: task.DesiredState,
+          state: task.Status?.State,
+          message: task.Status?.Message,
+          error: task.Status?.Err,
+          containerId: task.Status?.ContainerStatus?.ContainerID
+        }))
+      };
     } catch (error) {
       throw this.toServiceUnavailable(error);
     }

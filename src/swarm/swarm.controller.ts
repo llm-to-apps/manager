@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { DockerService } from '../docker/docker.service';
 import { CreateProjectServiceDto } from './dto/create-project-service.dto';
 
@@ -9,6 +9,11 @@ export class SwarmController {
   @Get('services')
   listServices() {
     return this.dockerService.listServices();
+  }
+
+  @Get('projects/:id')
+  getProjectService(@Param('id') id: string) {
+    return this.dockerService.getProjectServiceStatus(id);
   }
 
   @Post('projects')
