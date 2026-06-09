@@ -68,8 +68,6 @@ export class DockerService {
     const projectEnv = input.env ?? {};
     const appPort = input.ports?.app ?? 3001;
     const agentPort = input.ports?.agent ?? 7001;
-    const migrateCommand = projectEnv.MIGRATE_COMMAND ?? 'npm run db:deploy';
-    const seedCommand = projectEnv.SEED_COMMAND;
     const image = input.image ?? this.config.userInstanceImage;
     const serviceName = `project-${input.id}`;
 
@@ -82,13 +80,8 @@ export class DockerService {
       GIT_REPO_URL: input.git,
       APP_DOMAIN: input.domain,
       APP_PORT: String(appPort),
-      AGENT_PORT: String(agentPort),
-      MIGRATE_COMMAND: migrateCommand
+      AGENT_PORT: String(agentPort)
     });
-
-    if (seedCommand) {
-      env.push(`SEED_COMMAND=${seedCommand}`);
-    }
 
     try {
       const service = await this.docker.createService({
