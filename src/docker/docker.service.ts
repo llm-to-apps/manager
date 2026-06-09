@@ -138,7 +138,7 @@ export class DockerService {
       this.config.requireProjectNetworks();
     const projectEnv = input.env ?? {};
     const appPort = input.ports?.app ?? 3001;
-    const agentPort = input.ports?.agent ?? 7001;
+    const agentPort = input.ports?.agent ?? 7070;
     const image = input.image ?? this.config.userInstanceImage;
     const serviceName = `project-${input.id}`;
 
@@ -162,8 +162,21 @@ export class DockerService {
           'traefik.enable': 'true',
           [`traefik.http.routers.${serviceName}.rule`]: `Host(\`${input.domain}\`)`,
           [`traefik.http.routers.${serviceName}.entrypoints`]: 'web',
+          [`traefik.http.routers.${serviceName}.service`]: serviceName,
           [`traefik.http.services.${serviceName}.loadbalancer.server.port`]:
-            String(appPort)
+            String(appPort),
+          [`traefik.http.routers.${serviceName}-tools.rule`]:
+            `Host(\`${input.domain}\`) && PathPrefix(\`/agent-tools\`)`,
+          [`traefik.http.routers.${serviceName}-tools.entrypoints`]: 'web',
+          [`traefik.http.routers.${serviceName}-tools.priority`]: '100',
+          [`traefik.http.routers.${serviceName}-tools.service`]:
+            `${serviceName}-tools`,
+          [`traefik.http.routers.${serviceName}-tools.middlewares`]:
+            `${serviceName}-tools-strip`,
+          [`traefik.http.middlewares.${serviceName}-tools-strip.stripprefix.prefixes`]:
+            '/agent-tools',
+          [`traefik.http.services.${serviceName}-tools.loadbalancer.server.port`]:
+            String(agentPort)
         },
         TaskTemplate: {
           ContainerSpec: {
