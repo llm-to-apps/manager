@@ -1,6 +1,9 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import { DockerService } from '../docker/docker.service';
-import { CreateProjectServiceDto } from './dto/create-project-service.dto';
+import {
+  CreateProjectServiceDto,
+  DeleteProjectServiceDto
+} from './dto/create-project-service.dto';
 
 @Controller('swarm')
 export class SwarmController {
@@ -19,5 +22,13 @@ export class SwarmController {
   @Post('projects')
   createProjectService(@Body() input: CreateProjectServiceDto) {
     return this.dockerService.createProjectService(input);
+  }
+
+  @Delete('projects/:id')
+  deleteProjectService(
+    @Param('id') id: string,
+    @Body() input: DeleteProjectServiceDto
+  ) {
+    return this.dockerService.deleteProjectService(id, input);
   }
 }

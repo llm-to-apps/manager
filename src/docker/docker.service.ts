@@ -2,7 +2,10 @@ import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import Dockerode from 'dockerode';
 import { ConfigService } from '../config/config.service';
 import { MysqlService } from '../mysql/mysql.service';
-import { CreateProjectServiceDto } from '../swarm/dto/create-project-service.dto';
+import {
+  CreateProjectServiceDto,
+  DeleteProjectServiceDto
+} from '../swarm/dto/create-project-service.dto';
 
 type ServiceSummary = {
   ID?: string;
@@ -188,6 +191,37 @@ export class DockerService {
         ok: true,
         serviceId: service.id,
         serviceName
+      };
+    } catch (error) {
+      throw this.toServiceUnavailable(error);
+    }
+  }
+
+  async deleteProjectService(projectId: string, input: DeleteProjectServiceDto) {
+    const serviceName = `project-${projectId}`;
+    let removedService = false;
+
+    try {
+      const services = await this.docker.listServices({
+        filters: JSON.stringify({
+          name: [serviceName]
+        })
+      });
+      const service = services.find((candidate) => candidate.Spec?.Name === serviceName);
+
+      if (service?.ID) {
+        await this.docker.getService(service.ID).remove();
+        removedService = true;
+      }
+
+      await this.mysqlService.deleteProjectDatabase(input.services.mysql);
+
+      return {
+        ok: true,
+        projectId,
+        serviceName,
+        removedService,
+        removedDatabase: true
       };
     } catch (error) {
       throw this.toServiceUnavailable(error);

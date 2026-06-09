@@ -1,7 +1,10 @@
 import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { createConnection } from 'mysql2/promise';
 import { ConfigService } from '../config/config.service';
-import { MysqlServiceConfigDto } from '../swarm/dto/create-project-service.dto';
+import {
+  DeleteMysqlServiceConfigDto,
+  MysqlServiceConfigDto
+} from '../swarm/dto/create-project-service.dto';
 
 @Injectable()
 export class MysqlService {
@@ -25,6 +28,27 @@ export class MysqlService {
     } catch (error) {
       const message =
         error instanceof Error ? error.message : 'MySQL provisioning error';
+
+      throw new ServiceUnavailableException({
+        ok: false,
+        message
+      });
+    } finally {
+      await connection.end();
+    }
+  }
+
+  async deleteProjectDatabase(mysql: DeleteMysqlServiceConfigDto) {
+    const adminConfig = this.getMysqlRootConfig();
+    const connection = await createConnection(adminConfig);
+
+    try {
+      await connection.query(`DROP DATABASE IF EXISTS ??`, [mysql.db]);
+      await connection.query(`DROP USER IF EXISTS ?@'%'`, [mysql.user]);
+      await connection.query('FLUSH PRIVILEGES');
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'MySQL deletion error';
 
       throw new ServiceUnavailableException({
         ok: false,

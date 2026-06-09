@@ -32,6 +32,30 @@ export class ProjectServicesDto {
   mysql!: MysqlServiceConfigDto;
 }
 
+export class DeleteMysqlServiceConfigDto {
+  @IsString()
+  @IsNotEmpty()
+  db!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  user!: string;
+}
+
+export class DeleteProjectServicesDto {
+  @IsDefined()
+  @ValidateNested()
+  @Type(() => DeleteMysqlServiceConfigDto)
+  mysql!: DeleteMysqlServiceConfigDto;
+}
+
+export class DeleteProjectServiceDto {
+  @IsDefined()
+  @ValidateNested()
+  @Type(() => DeleteProjectServicesDto)
+  services!: DeleteProjectServicesDto;
+}
+
 export class ProjectPortsDto {
   @IsOptional()
   @IsInt()
