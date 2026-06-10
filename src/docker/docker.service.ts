@@ -78,12 +78,7 @@ export class DockerService {
     const serviceName = `project-${projectId}`;
 
     try {
-      const services = await this.docker.listServices({
-        filters: JSON.stringify({
-          name: [serviceName]
-        })
-      });
-      const service = services.find((candidate) => candidate.Spec?.Name === serviceName);
+      const service = await this.findServiceByName(serviceName);
 
       if (!service) {
         return {
@@ -158,6 +153,17 @@ export class DockerService {
     });
 
     try {
+      const existingService = await this.findServiceByName(serviceName);
+
+      if (existingService?.ID) {
+        return {
+          ok: true,
+          existing: true,
+          serviceId: existingService.ID,
+          serviceName
+        };
+      }
+
       const service = await this.docker.createService({
         Name: serviceName,
         Labels: {
@@ -249,12 +255,7 @@ export class DockerService {
     let removedDatabase = false;
 
     try {
-      const services = await this.docker.listServices({
-        filters: JSON.stringify({
-          name: [serviceName]
-        })
-      });
-      const service = services.find((candidate) => candidate.Spec?.Name === serviceName);
+      const service = await this.findServiceByName(serviceName);
 
       if (service?.ID) {
         await this.docker.getService(service.ID).remove();
@@ -306,6 +307,16 @@ export class DockerService {
 
   private getServiceImage(service: ServiceSummary) {
     return service.Spec?.TaskTemplate?.ContainerSpec?.Image;
+  }
+
+  private async findServiceByName(serviceName: string) {
+    const services = await this.docker.listServices({
+      filters: JSON.stringify({
+        name: [serviceName]
+      })
+    });
+
+    return services.find((candidate) => candidate.Spec?.Name === serviceName);
   }
 
   private toDockerEnv(env: Record<string, string>) {
