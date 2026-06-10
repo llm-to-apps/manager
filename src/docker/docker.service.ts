@@ -143,7 +143,9 @@ export class DockerService {
     const serviceName = `project-${input.id}`;
     const resources = this.createProjectResources(input);
 
-    await this.mysqlService.provisionProjectDatabase(input.services.mysql);
+    if (input.services.mysql) {
+      await this.mysqlService.provisionProjectDatabase(input.services.mysql);
+    }
 
     const env = this.toDockerEnv({
       ...projectEnv,
@@ -242,8 +244,9 @@ export class DockerService {
   }
 
   async deleteProjectService(projectId: string, input: DeleteProjectServiceDto) {
-    const serviceName = `project-${projectId}`;
+    const serviceName = input.serviceName || `project-${projectId}`;
     let removedService = false;
+    let removedDatabase = false;
 
     try {
       const services = await this.docker.listServices({
@@ -258,14 +261,17 @@ export class DockerService {
         removedService = true;
       }
 
-      await this.mysqlService.deleteProjectDatabase(input.services.mysql);
+      if (input.services?.mysql) {
+        await this.mysqlService.deleteProjectDatabase(input.services.mysql);
+        removedDatabase = true;
+      }
 
       return {
         ok: true,
         projectId,
         serviceName,
         removedService,
-        removedDatabase: true
+        removedDatabase
       };
     } catch (error) {
       throw this.toServiceUnavailable(error);

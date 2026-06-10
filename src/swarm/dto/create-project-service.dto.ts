@@ -27,10 +27,10 @@ export class MysqlServiceConfigDto {
 }
 
 export class ProjectServicesDto {
-  @IsDefined()
+  @IsOptional()
   @ValidateNested()
   @Type(() => MysqlServiceConfigDto)
-  mysql!: MysqlServiceConfigDto;
+  mysql?: MysqlServiceConfigDto;
 }
 
 export class DeleteMysqlServiceConfigDto {
@@ -44,17 +44,22 @@ export class DeleteMysqlServiceConfigDto {
 }
 
 export class DeleteProjectServicesDto {
-  @IsDefined()
+  @IsOptional()
   @ValidateNested()
   @Type(() => DeleteMysqlServiceConfigDto)
-  mysql!: DeleteMysqlServiceConfigDto;
+  mysql?: DeleteMysqlServiceConfigDto;
 }
 
 export class DeleteProjectServiceDto {
-  @IsDefined()
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  serviceName?: string;
+
+  @IsOptional()
   @ValidateNested()
   @Type(() => DeleteProjectServicesDto)
-  services!: DeleteProjectServicesDto;
+  services?: DeleteProjectServicesDto;
 }
 
 export class ProjectPortsDto {
