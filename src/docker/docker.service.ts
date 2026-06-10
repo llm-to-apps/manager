@@ -141,6 +141,7 @@ export class DockerService {
     const agentPort = input.ports?.agent ?? 7070;
     const image = input.image ?? this.config.userInstanceImage;
     const serviceName = `project-${input.id}`;
+    const resources = this.createProjectResources(input);
 
     await this.mysqlService.provisionProjectDatabase(input.services.mysql);
 
@@ -200,12 +201,12 @@ export class DockerService {
           },
           Resources: {
             Reservations: {
-              MemoryBytes: this.config.projectMemoryReservationBytes,
-              NanoCPUs: this.config.projectCpuReservationNanoCpus
+              MemoryBytes: resources.memoryReservationBytes,
+              NanoCPUs: resources.cpuReservationNanoCpus
             },
             Limits: {
-              MemoryBytes: this.config.projectMemoryLimitBytes,
-              NanoCPUs: this.config.projectCpuLimitNanoCpus
+              MemoryBytes: resources.memoryLimitBytes,
+              NanoCPUs: resources.cpuLimitNanoCpus
             }
           }
         },
@@ -280,6 +281,23 @@ export class DockerService {
     });
   }
 
+  private createProjectResources(input: CreateProjectServiceDto) {
+    return {
+      memoryReservationBytes:
+        megabytesToBytes(input.resources?.memory?.reservationMb) ??
+        this.config.projectMemoryReservationBytes,
+      memoryLimitBytes:
+        megabytesToBytes(input.resources?.memory?.limitMb) ??
+        this.config.projectMemoryLimitBytes,
+      cpuReservationNanoCpus:
+        cpusToNanoCpus(input.resources?.cpu?.reservation) ??
+        this.config.projectCpuReservationNanoCpus,
+      cpuLimitNanoCpus:
+        cpusToNanoCpus(input.resources?.cpu?.limit) ??
+        this.config.projectCpuLimitNanoCpus
+    };
+  }
+
   private getServiceImage(service: ServiceSummary) {
     return service.Spec?.TaskTemplate?.ContainerSpec?.Image;
   }
@@ -287,4 +305,20 @@ export class DockerService {
   private toDockerEnv(env: Record<string, string>) {
     return Object.entries(env).map(([key, value]) => `${key}=${value}`);
   }
+}
+
+function megabytesToBytes(value: number | undefined) {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  return Math.max(1, Math.floor(value)) * 1024 * 1024;
+}
+
+function cpusToNanoCpus(value: number | undefined) {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  return Math.floor(Math.max(0.001, value) * 1_000_000_000);
 }

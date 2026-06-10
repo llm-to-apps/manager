@@ -2,6 +2,7 @@ import {
   IsInt,
   IsDefined,
   IsNotEmpty,
+  IsNumber,
   IsObject,
   IsOptional,
   IsString,
@@ -70,6 +71,42 @@ export class ProjectPortsDto {
   agent?: number;
 }
 
+export class ProjectMemoryResourcesDto {
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  reservationMb?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  limitMb?: number;
+}
+
+export class ProjectCpuResourcesDto {
+  @IsOptional()
+  @IsNumber()
+  @Min(0.001)
+  reservation?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0.001)
+  limit?: number;
+}
+
+export class ProjectResourcesDto {
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ProjectMemoryResourcesDto)
+  memory?: ProjectMemoryResourcesDto;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ProjectCpuResourcesDto)
+  cpu?: ProjectCpuResourcesDto;
+}
+
 export class CreateProjectServiceDto {
   @IsString()
   @IsNotEmpty()
@@ -96,6 +133,11 @@ export class CreateProjectServiceDto {
   @ValidateNested()
   @Type(() => ProjectPortsDto)
   ports?: ProjectPortsDto;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ProjectResourcesDto)
+  resources?: ProjectResourcesDto;
 
   @IsOptional()
   @IsString()
