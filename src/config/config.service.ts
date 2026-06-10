@@ -14,6 +14,16 @@ export class ConfigService {
     process.env.USER_INSTANCE_IMAGE || 'llagents/user-instance:latest';
   readonly dbNetworkId = process.env.DB_NETWORK_ID;
   readonly ingressNetworkId = process.env.INGRESS_NETWORK_ID;
+  readonly projectMemoryReservationBytes = megabytesEnv(
+    'PROJECT_MEMORY_RESERVATION_MB',
+    128
+  );
+  readonly projectMemoryLimitBytes = megabytesEnv('PROJECT_MEMORY_LIMIT_MB', 768);
+  readonly projectCpuReservationNanoCpus = cpusEnv(
+    'PROJECT_CPU_RESERVATION',
+    0.05
+  );
+  readonly projectCpuLimitNanoCpus = cpusEnv('PROJECT_CPU_LIMIT', 1);
 
   requireProjectNetworks() {
     if (!this.dbNetworkId || !this.ingressNetworkId) {
@@ -38,4 +48,16 @@ export class ConfigService {
       password: this.mysqlRootPassword
     };
   }
+}
+
+function megabytesEnv(key: string, fallback: number) {
+  const value = Number(process.env[key] || fallback);
+
+  return Math.max(1, Math.floor(value)) * 1024 * 1024;
+}
+
+function cpusEnv(key: string, fallback: number) {
+  const value = Number(process.env[key] || fallback);
+
+  return Math.floor(Math.max(0.001, value) * 1_000_000_000);
 }

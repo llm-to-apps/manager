@@ -184,14 +184,44 @@ export class DockerService {
             Env: env
           },
           Networks: [{ Target: dbNetworkId }, { Target: ingressNetworkId }],
+          Placement: {
+            Preferences: [
+              {
+                Spread: {
+                  SpreadDescriptor: 'node.id'
+                }
+              }
+            ]
+          },
           RestartPolicy: {
-            Condition: 'any'
+            Condition: 'any',
+            Delay: 5 * 1_000_000_000,
+            Window: 60 * 1_000_000_000
           },
           Resources: {
+            Reservations: {
+              MemoryBytes: this.config.projectMemoryReservationBytes,
+              NanoCPUs: this.config.projectCpuReservationNanoCpus
+            },
             Limits: {
-              MemoryBytes: 1024 * 1024 * 1024
+              MemoryBytes: this.config.projectMemoryLimitBytes,
+              NanoCPUs: this.config.projectCpuLimitNanoCpus
             }
           }
+        },
+        UpdateConfig: {
+          Parallelism: 1,
+          Delay: 10 * 1_000_000_000,
+          FailureAction: 'rollback',
+          Monitor: 30 * 1_000_000_000,
+          Order: 'stop-first'
+        },
+        RollbackConfig: {
+          Parallelism: 1,
+          Delay: 10 * 1_000_000_000,
+          FailureAction: 'pause',
+          Monitor: 30 * 1_000_000_000,
+          Order: 'stop-first'
         },
         Mode: {
           Replicated: {
