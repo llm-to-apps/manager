@@ -23,7 +23,7 @@ docker build -t os7/manager:local ./manager
 The `main` branch publishes the Docker image to GitHub Container Registry:
 
 ```text
-ghcr.io/os7/manager:latest
+ghcr.io/llm-to-apps/manager:latest
 ```
 
 Tagged releases like `v0.1.0` also publish matching image tags.
@@ -56,7 +56,7 @@ Example project service request:
 ```json
 {
   "id": "xxxYYY",
-  "git": "git@github.com:os7/project-123.git",
+  "git": "git@github.com:llm-to-apps/project-123.git",
   "services": {
     "mysql": {
       "db": "xxxYYY",

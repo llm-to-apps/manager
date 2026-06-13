@@ -10,7 +10,7 @@ export class ConfigService {
   readonly mysqlRootUser = process.env.MYSQL_ROOT_USER || 'root';
   readonly mysqlRootPassword = process.env.MYSQL_ROOT_PASSWORD;
   readonly userInstanceImage =
-    process.env.USER_INSTANCE_IMAGE || 'os7/user-instance:latest';
+    process.env.USER_INSTANCE_IMAGE || 'ghcr.io/llm-to-apps/user-instance:latest';
   readonly stackName = process.env.STACK_NAME || 'os7';
   readonly dbNetworkId = `${this.stackName}_db`;
   readonly ingressNetworkId = `${this.stackName}_ingress`;
