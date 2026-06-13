@@ -172,6 +172,14 @@ export class DockerService {
           [`traefik.http.routers.${serviceName}.rule`]: `Host(\`${input.domain}\`)`,
           [`traefik.http.routers.${serviceName}.entrypoints`]: 'web',
           [`traefik.http.routers.${serviceName}.service`]: serviceName,
+          [`traefik.http.routers.${serviceName}.middlewares`]:
+            `${serviceName}-no-cache`,
+          [`traefik.http.middlewares.${serviceName}-no-cache.headers.customresponseheaders.Cache-Control`]:
+            'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+          [`traefik.http.middlewares.${serviceName}-no-cache.headers.customresponseheaders.Pragma`]:
+            'no-cache',
+          [`traefik.http.middlewares.${serviceName}-no-cache.headers.customresponseheaders.Expires`]:
+            '0',
           [`traefik.http.services.${serviceName}.loadbalancer.server.port`]:
             String(appPort),
           [`traefik.http.routers.${serviceName}-tools.rule`]:
