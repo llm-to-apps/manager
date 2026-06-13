@@ -26,7 +26,7 @@ async function bootstrap() {
   );
 
   await app.listen(config.port, config.host);
-  logger.log(`LLAgents manager listening on ${config.host}:${config.port}`);
+  logger.log(`OS7 manager listening on ${config.host}:${config.port}`);
 }
 
 bootstrap();

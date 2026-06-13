@@ -125,6 +125,11 @@ export class CreateProjectServiceDto {
   @IsNotEmpty()
   domain!: string;
 
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  serviceName?: string;
+
   @IsDefined()
   @ValidateNested()
   @Type(() => ProjectServicesDto)

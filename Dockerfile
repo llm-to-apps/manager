@@ -19,8 +19,8 @@ RUN npm ci --omit=dev
 COPY --from=deps /app/dist ./dist
 
 ENV NODE_ENV=production
-ENV PORT=8080
+ENV PORT=80
 
-EXPOSE 8080
+EXPOSE 80
 
 CMD ["node", "dist/main.js"]

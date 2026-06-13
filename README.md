@@ -1,4 +1,4 @@
-# LLAgents Manager
+# OS7 Manager
 
 Internal control-plane service for managing user app services in Docker Swarm.
 
@@ -15,7 +15,7 @@ Do not expose this service publicly. It can create, inspect, restart, and remove
 ## Local container build
 
 ```bash
-docker build -t llagents/manager:local ./manager
+docker build -t os7/manager:local ./manager
 ```
 
 ## Published image
@@ -23,7 +23,7 @@ docker build -t llagents/manager:local ./manager
 The `main` branch publishes the Docker image to GitHub Container Registry:
 
 ```text
-ghcr.io/llm-to-apps/manager:latest
+ghcr.io/os7/manager:latest
 ```
 
 Tagged releases like `v0.1.0` also publish matching image tags.
@@ -56,7 +56,7 @@ Example project service request:
 ```json
 {
   "id": "xxxYYY",
-  "git": "git@github.com:llm-to-apps/project-123.git",
+  "git": "git@github.com:os7/project-123.git",
   "services": {
     "mysql": {
       "db": "xxxYYY",
@@ -72,7 +72,7 @@ Example project service request:
     "MYSQL_PASSWORD": "xxxYYY",
     "DATABASE_URL": "mysql://xxxYYY:xxxYYY@mysql:3306/xxxYYY"
   },
-  "domain": "demo.llmagents.com",
+  "domain": "demo.os7.dev",
   "ports": {
     "app": 3001,
     "agent": 7001
@@ -85,8 +85,6 @@ The manager provisions the project MySQL database/user through root MySQL creden
 `POST /swarm/projects` requires these manager environment variables:
 
 ```text
-DB_NETWORK_ID
-INGRESS_NETWORK_ID
 USER_INSTANCE_IMAGE
 MYSQL_HOST
 MYSQL_ROOT_USER

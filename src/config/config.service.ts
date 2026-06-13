@@ -3,17 +3,17 @@ import { Injectable } from '@nestjs/common';
 @Injectable()
 export class ConfigService {
   readonly host = process.env.HOST || '0.0.0.0';
-  readonly port = Number(process.env.PORT || 8080);
+  readonly port = Number(process.env.PORT || 80);
   readonly dockerSocket = process.env.DOCKER_SOCKET || '/var/run/docker.sock';
-  readonly rootDomain = process.env.ROOT_DOMAIN || 'llmagents.com';
   readonly mysqlHost = process.env.MYSQL_HOST || 'mysql';
   readonly mysqlPort = Number(process.env.MYSQL_PORT || 3306);
   readonly mysqlRootUser = process.env.MYSQL_ROOT_USER || 'root';
   readonly mysqlRootPassword = process.env.MYSQL_ROOT_PASSWORD;
   readonly userInstanceImage =
-    process.env.USER_INSTANCE_IMAGE || 'llagents/user-instance:latest';
-  readonly dbNetworkId = process.env.DB_NETWORK_ID;
-  readonly ingressNetworkId = process.env.INGRESS_NETWORK_ID;
+    process.env.USER_INSTANCE_IMAGE || 'os7/user-instance:latest';
+  readonly stackName = process.env.STACK_NAME || 'os7';
+  readonly dbNetworkId = `${this.stackName}_db`;
+  readonly ingressNetworkId = `${this.stackName}_ingress`;
   readonly projectMemoryReservationBytes = megabytesEnv(
     'PROJECT_MEMORY_RESERVATION_MB',
     128
@@ -26,10 +26,6 @@ export class ConfigService {
   readonly projectCpuLimitNanoCpus = cpusEnv('PROJECT_CPU_LIMIT', 1);
 
   requireProjectNetworks() {
-    if (!this.dbNetworkId || !this.ingressNetworkId) {
-      throw new Error('DB_NETWORK_ID and INGRESS_NETWORK_ID must be configured');
-    }
-
     return {
       dbNetworkId: this.dbNetworkId,
       ingressNetworkId: this.ingressNetworkId

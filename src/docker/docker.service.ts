@@ -75,7 +75,7 @@ export class DockerService {
   }
 
   async getProjectServiceStatus(projectId: string) {
-    const serviceName = `project-${projectId}`;
+    const serviceName = `app-${projectId}`;
 
     try {
       const service = await this.findServiceByName(serviceName);
@@ -135,7 +135,7 @@ export class DockerService {
     const appPort = input.ports?.app ?? 3001;
     const agentPort = input.ports?.agent ?? 7070;
     const image = input.image ?? this.config.userInstanceImage;
-    const serviceName = `project-${input.id}`;
+    const serviceName = input.serviceName || `app-${input.id}`;
     const resources = this.createProjectResources(input);
 
     if (input.services.mysql) {
@@ -167,7 +167,7 @@ export class DockerService {
       const service = await this.docker.createService({
         Name: serviceName,
         Labels: {
-          'llagents.project_id': input.id,
+          'os7.project_id': input.id,
           'traefik.enable': 'true',
           [`traefik.http.routers.${serviceName}.rule`]: `Host(\`${input.domain}\`)`,
           [`traefik.http.routers.${serviceName}.entrypoints`]: 'web',
@@ -250,7 +250,7 @@ export class DockerService {
   }
 
   async deleteProjectService(projectId: string, input: DeleteProjectServiceDto) {
-    const serviceName = input.serviceName || `project-${projectId}`;
+    const serviceName = input.serviceName || `app-${projectId}`;
     let removedService = false;
     let removedDatabase = false;
 

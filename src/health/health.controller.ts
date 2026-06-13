@@ -6,7 +6,7 @@ export class HealthController {
   getHealth() {
     return {
       ok: true,
-      service: 'llagents-manager'
+      service: 'os7-manager'
     };
   }
 }
