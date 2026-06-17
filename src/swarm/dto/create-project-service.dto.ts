@@ -134,6 +134,11 @@ export class CreateProjectServiceDto {
   @IsOptional()
   @IsString()
   @IsNotEmpty()
+  devDomain?: string;
+
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
   serviceName?: string;
 
   @IsDefined()

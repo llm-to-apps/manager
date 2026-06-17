@@ -135,6 +135,7 @@ export class DockerService {
     const appPort = input.ports?.app ?? 3001;
     const agentPort = input.ports?.agent ?? 7070;
     const devPort = input.ports?.dev ?? 8080;
+    const devDomain = input.devDomain ?? input.domain;
     const image = input.image ?? this.config.userInstanceImage;
     const serviceName = input.serviceName || `app-${input.id}`;
     const resources = this.createProjectResources(input);
@@ -149,6 +150,7 @@ export class DockerService {
       REPO_URL: input.git,
       GIT_REPO_URL: input.git,
       APP_DOMAIN: input.domain,
+      APP_DEV_DOMAIN: devDomain,
       APP_PORT: String(appPort),
       AGENT_PORT: String(agentPort),
       APP_DEV_PORT: String(devPort)
@@ -197,8 +199,8 @@ export class DockerService {
           [`traefik.http.services.${serviceName}-runtime.loadbalancer.server.port`]:
             String(agentPort),
           [`traefik.http.routers.${serviceName}-dev.rule`]:
-            `Host(\`${input.domain}\`)`,
-          [`traefik.http.routers.${serviceName}-dev.entrypoints`]: 'dev',
+            `Host(\`${devDomain}\`)`,
+          [`traefik.http.routers.${serviceName}-dev.entrypoints`]: 'web',
           [`traefik.http.routers.${serviceName}-dev.priority`]: '1000',
           [`traefik.http.routers.${serviceName}-dev.service`]:
             `${serviceName}-dev`,
