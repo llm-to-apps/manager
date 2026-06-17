@@ -134,6 +134,7 @@ export class DockerService {
     const projectEnv = input.env ?? {};
     const appPort = input.ports?.app ?? 3001;
     const agentPort = input.ports?.agent ?? 7070;
+    const devPort = input.ports?.dev ?? 8080;
     const image = input.image ?? this.config.userInstanceImage;
     const serviceName = input.serviceName || `app-${input.id}`;
     const resources = this.createProjectResources(input);
@@ -149,7 +150,8 @@ export class DockerService {
       GIT_REPO_URL: input.git,
       APP_DOMAIN: input.domain,
       APP_PORT: String(appPort),
-      AGENT_PORT: String(agentPort)
+      AGENT_PORT: String(agentPort),
+      APP_DEV_PORT: String(devPort)
     });
 
     try {
@@ -182,6 +184,28 @@ export class DockerService {
             '0',
           [`traefik.http.services.${serviceName}.loadbalancer.server.port`]:
             String(appPort),
+          [`traefik.http.routers.${serviceName}-runtime.rule`]:
+            `Host(\`${input.domain}\`) && PathPrefix(\`/platform/app/runtime\`)`,
+          [`traefik.http.routers.${serviceName}-runtime.entrypoints`]: 'web',
+          [`traefik.http.routers.${serviceName}-runtime.priority`]: '110',
+          [`traefik.http.routers.${serviceName}-runtime.service`]:
+            `${serviceName}-runtime`,
+          [`traefik.http.routers.${serviceName}-runtime.middlewares`]:
+            `${serviceName}-runtime-strip`,
+          [`traefik.http.middlewares.${serviceName}-runtime-strip.stripprefix.prefixes`]:
+            '/platform/app',
+          [`traefik.http.services.${serviceName}-runtime.loadbalancer.server.port`]:
+            String(agentPort),
+          [`traefik.http.routers.${serviceName}-dev.rule`]:
+            `Host(\`${input.domain}\`)`,
+          [`traefik.http.routers.${serviceName}-dev.entrypoints`]: 'dev',
+          [`traefik.http.routers.${serviceName}-dev.priority`]: '1000',
+          [`traefik.http.routers.${serviceName}-dev.service`]:
+            `${serviceName}-dev`,
+          [`traefik.http.routers.${serviceName}-dev.middlewares`]:
+            `${serviceName}-no-cache`,
+          [`traefik.http.services.${serviceName}-dev.loadbalancer.server.port`]:
+            String(devPort),
           [`traefik.http.routers.${serviceName}-tools.rule`]:
             `Host(\`${input.domain}\`) && PathPrefix(\`/agent-tools\`)`,
           [`traefik.http.routers.${serviceName}-tools.entrypoints`]: 'web',

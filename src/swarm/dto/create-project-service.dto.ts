@@ -74,6 +74,12 @@ export class ProjectPortsDto {
   @Min(1)
   @Max(65535)
   agent?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(65535)
+  dev?: number;
 }
 
 export class ProjectMemoryResourcesDto {
