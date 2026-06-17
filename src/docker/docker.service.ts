@@ -134,7 +134,7 @@ export class DockerService {
     const projectEnv = input.env ?? {};
     const appPort = input.ports?.app ?? 3001;
     const agentPort = input.ports?.agent ?? 7070;
-    const devPort = input.ports?.dev ?? 8080;
+    const devPort = input.ports?.dev ?? 4046;
     const devDomain = input.devDomain ?? input.domain;
     const image = input.image ?? this.config.userInstanceImage;
     const serviceName = input.serviceName || `app-${input.id}`;
