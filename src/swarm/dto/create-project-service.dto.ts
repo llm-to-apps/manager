@@ -62,6 +62,17 @@ export class DeleteProjectServiceDto {
   services?: DeleteProjectServicesDto;
 }
 
+export class UpdateProjectServiceDto {
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  serviceName?: string;
+
+  @IsString()
+  @IsNotEmpty()
+  image!: string;
+}
+
 export class ProjectPortsDto {
   @IsOptional()
   @IsInt()

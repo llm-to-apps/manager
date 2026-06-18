@@ -1,10 +1,15 @@
-import { Injectable, ServiceUnavailableException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ServiceUnavailableException
+} from '@nestjs/common';
 import Dockerode from 'dockerode';
 import { ConfigService } from '../config/config.service';
 import { MysqlService } from '../mysql/mysql.service';
 import {
   CreateProjectServiceDto,
-  DeleteProjectServiceDto
+  DeleteProjectServiceDto,
+  UpdateProjectServiceDto
 } from '../swarm/dto/create-project-service.dto';
 
 type ServiceSummary = {
@@ -279,6 +284,52 @@ export class DockerService {
         serviceName
       };
     } catch (error) {
+      throw this.toServiceUnavailable(error);
+    }
+  }
+
+  async updateProjectService(projectId: string, input: UpdateProjectServiceDto) {
+    const serviceName = input.serviceName || `app-${projectId}`;
+
+    try {
+      const existingService = await this.findServiceByName(serviceName);
+
+      if (!existingService?.ID) {
+        throw new NotFoundException(`Project service ${serviceName} not found`);
+      }
+
+      const service = this.docker.getService(existingService.ID);
+      const inspected = await service.inspect();
+      const version = inspected.Version?.Index;
+      const spec = inspected.Spec;
+
+      if (!version || !spec?.TaskTemplate?.ContainerSpec) {
+        throw new Error(`Project service ${serviceName} cannot be updated`);
+      }
+
+      await service.update({
+        ...spec,
+        version,
+        TaskTemplate: {
+          ...spec.TaskTemplate,
+          ContainerSpec: {
+            ...spec.TaskTemplate.ContainerSpec,
+            Image: input.image
+          }
+        }
+      });
+
+      return {
+        ok: true,
+        serviceId: existingService.ID,
+        serviceName,
+        image: input.image
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
       throw this.toServiceUnavailable(error);
     }
   }
