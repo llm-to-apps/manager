@@ -82,6 +82,10 @@ Example project service request:
 
 The manager provisions the project MySQL database/user through root MySQL credentials and creates a Swarm service for the user instance. Runtime environment variables are passed from `env`; if the app needs `DATABASE_URL`, include it explicitly in `env`.
 
+The manager also owns SeaweedFS admin credentials. Web does not receive those
+credentials; it calls manager to provision the shared web bucket credentials and
+per-project bucket credentials.
+
 `POST /swarm/projects` requires these manager environment variables:
 
 ```text
@@ -89,4 +93,7 @@ USER_INSTANCE_IMAGE
 MYSQL_HOST
 MYSQL_ROOT_USER
 MYSQL_ROOT_PASSWORD
+STORAGE_S3_ENDPOINT
+STORAGE_S3_ACCESS_KEY_ID
+STORAGE_S3_SECRET_ACCESS_KEY
 ```
