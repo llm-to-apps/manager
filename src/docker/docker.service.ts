@@ -262,14 +262,14 @@ export class DockerService {
           Delay: 10 * 1_000_000_000,
           FailureAction: 'rollback',
           Monitor: 30 * 1_000_000_000,
-          Order: 'stop-first'
+          Order: 'start-first'
         },
         RollbackConfig: {
           Parallelism: 1,
           Delay: 10 * 1_000_000_000,
           FailureAction: 'pause',
           Monitor: 30 * 1_000_000_000,
-          Order: 'stop-first'
+          Order: 'start-first'
         },
         Mode: {
           Replicated: {
@@ -310,6 +310,14 @@ export class DockerService {
       await service.update({
         ...spec,
         version,
+        UpdateConfig: {
+          ...spec.UpdateConfig,
+          Order: 'start-first'
+        },
+        RollbackConfig: {
+          ...spec.RollbackConfig,
+          Order: 'start-first'
+        },
         TaskTemplate: {
           ...spec.TaskTemplate,
           ContainerSpec: {
